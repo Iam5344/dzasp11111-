@@ -6,23 +6,23 @@ using Shop.DTOs;
 
 namespace Shop.Queries;
 
-public class GetAllProductsQueryHandler : IRequestHandler<GetAllProductsQuery, IEnumerable<ProductReadDto>>
+public class GetProductByIdQueryHandler : IRequestHandler<GetProductByIdQuery, ProductReadDto?>
 {
     private readonly AppDbContext _context;
     private readonly IMapper _mapper;
 
-    public GetAllProductsQueryHandler(AppDbContext context, IMapper mapper)
+    public GetProductByIdQueryHandler(AppDbContext context, IMapper mapper)
     {
         _context = context;
         _mapper = mapper;
     }
 
-    public async Task<IEnumerable<ProductReadDto>> Handle(GetAllProductsQuery request, CancellationToken cancellationToken)
+    public async Task<ProductReadDto?> Handle(GetProductByIdQuery request, CancellationToken cancellationToken)
     {
-        var products = await _context.Products
+        var product = await _context.Products
             .AsNoTracking()
-            .ToListAsync(cancellationToken);
+            .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
 
-        return _mapper.Map<IEnumerable<ProductReadDto>>(products);
+        return product is null ? null : _mapper.Map<ProductReadDto>(product);
     }
 }
